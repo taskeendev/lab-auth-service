@@ -35,7 +35,7 @@ Repos: `lab-auth-service` · `lab-web` · `lab-feed-service` · `lab-contact-ser
 ## Roadmap
 
 1. **auth-service ภาค 1** — register/login/JWT/roles/เปลี่ยนรหัส + CI ← เริ่มที่นี่
-2. auth-service ภาค 2 — reset รหัสผ่านอีเมล + 2FA TOTP
+2. auth-service ภาค 2 — reset รหัสผ่านอีเมล + 2FA TOTP + **social login (OAuth2/OIDC)**
 3. lab-web shell — TS+Tailwind+shadcn + i18n + dark mode + login/register → Vercel
 4. Presence realtime + admin dashboard
 5. feed-service + UI
@@ -53,7 +53,9 @@ GET  /api/admin/users       (ADMIN) → รายชื่อ user
 GET  /health                → 200
 ```
 
-- รหัสผ่าน hash ด้วย BCrypt, JWT stateless (sub/role/exp), secret จาก env
+- รหัสผ่าน hash ด้วย BCrypt; **JWT access token อายุสั้น (stateless) + refresh token เก็บ DB
+  (ส่งเป็น HttpOnly cookie, เพิกถอนได้ — รากของฟีเจอร์ presence/force-logout)**; secret จาก env
+- **OAuth2/OIDC social login (Google/GitHub)** อยู่ใน roadmap ภาคถัดไป
 - คนที่ register ด้วยอีเมลตรง `ADMIN_EMAIL` (env) ได้ role ADMIN (กลไก bootstrap)
 - Flyway จัดการ schema, Testcontainers สำหรับ integration test, springdoc-openapi เอกสาร API
 

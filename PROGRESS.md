@@ -13,6 +13,7 @@
 - [ ] 4. POST /api/auth/login → JWT + Security filter chain (stateless)
 - [ ] 5. Roles USER/ADMIN + /api/admin/users + bootstrap admin จาก env
 - [ ] 6. เปลี่ยนรหัสผ่าน + integration tests (Testcontainers) + GitHub Actions CI
+- [ ] 7. refresh token (เก็บ DB, HttpOnly cookie, rotation) + logout/revoke
 
 เกณฑ์ผ่านเฟส: CI เขียวบน GitHub
 
