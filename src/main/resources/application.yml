@@ -1,6 +1,11 @@
 # ทุกค่ามาจาก env เสมอ (ค่าหลัง : คือ default สำหรับ dev เท่านั้น — ห้ามใส่ secret จริงในไฟล์นี้)
 server:
   port: ${SERVER_PORT:8081}
+  shutdown: graceful   # รอ request ค้างให้จบก่อนดับ — สำคัญตอนอยู่หลัง gateway/k8s
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{requestId:-—}] %logger{24} : %msg%n"
 
 spring:
   application:

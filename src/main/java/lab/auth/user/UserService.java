@@ -53,4 +53,14 @@ public class UserService {
         return users.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedException("unknown user"));
     }
+
+    // ต้องพิสูจน์ว่ารู้รหัสเดิมก่อนเสมอ — token ที่ถูกขโมยจะเอาไปยึดบัญชีถาวรไม่ได้
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        User user = getByUsername(username);
+        if (!encoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new UnauthorizedException("current password is incorrect");
+        }
+        user.setPasswordHash(encoder.encode(newPassword));
+        users.save(user);
+    }
 }

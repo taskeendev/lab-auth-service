@@ -12,12 +12,14 @@
 - [x] 3. POST /api/auth/register (validation + BCrypt) + GlobalExceptionHandler (RFC 7807) — 2026-06-12
 - [x] 4. POST /api/auth/login → JWT + Security filter chain (stateless) — 2026-06-12
 - [x] 5. Roles USER/ADMIN + /api/admin/users + bootstrap admin จาก env — 2026-06-12
-- [ ] 6. เปลี่ยนรหัสผ่าน + structured logging/request id + integration tests (Testcontainers) + GitHub Actions CI
+- [x] 6. เปลี่ยนรหัสผ่าน + structured logging/request id + integration tests (Testcontainers) + GitHub Actions CI — 2026-06-12
 - [ ] 7. refresh token (เก็บ DB, HttpOnly cookie, rotation) + logout/revoke
 
 เกณฑ์ผ่านเฟส: CI เขียวบน GitHub
 
 ## Log การทำงาน
+
+- 2026-06-12 — ขั้น 6 เสร็จ: POST /users/me/password (ต้องรู้รหัสเดิม — token ถูกขโมยยึดบัญชีถาวรไม่ได้); RequestIdFilter (รับต่อ X-Request-Id หรือสร้างใหม่, MDC ใส่ทุกบรรทัด log, access log ท้าย request, ล้าง MDC กัน thread reuse); graceful shutdown; AuthFlowIntegrationTest (Testcontainers postgres:16) ครอบ 14 จุด: register/dup/validation/login ผิด-ถูก/me/401/403/admin bootstrap/เปลี่ยนรหัสครบวงจร; แก้ generics capture ใน assertion 2 รอบ; CI = gradlew build บน ubuntu (docker มีในตัว)
 
 - 2026-06-12 — ขั้น 5 เสร็จ: @EnableMethodSecurity + @PreAuthorize("hasRole('ADMIN')") ที่ /api/admin/users; bootstrap admin จาก ADMIN_EMAIL env (เว้นว่าง = ปิด); **บั๊กที่เจอ+แก้**: @PreAuthorize โยน AccessDeniedException ทะลุ MVC เข้า catch-all ของ GlobalExceptionHandler → กลายเป็น 500 (accessDeniedHandler ของ filter chain จับไม่ถึงชั้น method) → เพิ่ม @ExceptionHandler(AccessDeniedException) → 403; เทสต์: ADMIN 200 / USER 403 / นิรนาม 401
 
