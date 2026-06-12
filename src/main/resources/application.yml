@@ -1,0 +1,7 @@
+# ทุกค่ามาจาก env เสมอ (ค่าหลัง : คือ default สำหรับ dev เท่านั้น — ห้ามใส่ secret จริงในไฟล์นี้)
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: auth-service
