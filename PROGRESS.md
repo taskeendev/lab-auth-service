@@ -13,11 +13,13 @@
 - [x] 4. POST /api/auth/login → JWT + Security filter chain (stateless) — 2026-06-12
 - [x] 5. Roles USER/ADMIN + /api/admin/users + bootstrap admin จาก env — 2026-06-12
 - [x] 6. เปลี่ยนรหัสผ่าน + structured logging/request id + integration tests (Testcontainers) + GitHub Actions CI — 2026-06-12
-- [ ] 7. refresh token (เก็บ DB, HttpOnly cookie, rotation) + logout/revoke
+- [x] 7. refresh token (เก็บ DB, HttpOnly cookie, rotation) + logout/revoke — 2026-06-12
 
 เกณฑ์ผ่านเฟส: CI เขียวบน GitHub
 
 ## Log การทำงาน
+
+- 2026-06-12 — ขั้น 7 เสร็จ = **auth-service ภาค 1 จบ**: refresh_tokens (เก็บ SHA-256 ไม่เก็บ token ดิบ), RefreshService: issue/consume (rotation)/revoke/revokeAllFor + reuse detection (token ที่หมุนทิ้งแล้วโผล่ซ้ำ = เผาทุก session); HttpOnly cookie path=/api/auth SameSite=Lax secure จาก env; /refresh /logout; **บั๊กที่เทสต์จับได้: @Transactional rollback ตอนโยน 401 ทำให้การเผา session ถูกย้อนกลับ → dontRollbackOn=UnauthorizedException**; integration tests 2 ตัวครอบ rotation/reuse/logout ครบ
 
 - 2026-06-12 — ขั้น 6 เสร็จ: POST /users/me/password (ต้องรู้รหัสเดิม — token ถูกขโมยยึดบัญชีถาวรไม่ได้); RequestIdFilter (รับต่อ X-Request-Id หรือสร้างใหม่, MDC ใส่ทุกบรรทัด log, access log ท้าย request, ล้าง MDC กัน thread reuse); graceful shutdown; AuthFlowIntegrationTest (Testcontainers postgres:16) ครอบ 14 จุด: register/dup/validation/login ผิด-ถูก/me/401/403/admin bootstrap/เปลี่ยนรหัสครบวงจร; แก้ generics capture ใน assertion 2 รอบ; CI = gradlew build บน ubuntu (docker มีในตัว)
 

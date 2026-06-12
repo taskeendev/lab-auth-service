@@ -125,4 +125,56 @@ class AuthFlowIntegrationTest {
                 .isEqualTo(HttpStatus.UNAUTHORIZED);
         login("bob", "evenlonger22");
     }
+
+    private static String refreshCookieOf(ResponseEntity<?> response) {
+        return response.getHeaders().get(HttpHeaders.SET_COOKIE).stream()
+                .filter(c -> c.startsWith("refresh_token="))
+                .map(c -> c.split(";", 2)[0])
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private ResponseEntity<Map> refreshWith(String cookie) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.COOKIE, cookie);
+        return rest.exchange("/api/auth/refresh", HttpMethod.POST,
+                new HttpEntity<>(headers), Map.class);
+    }
+
+    @Test
+    void refreshRotationAndLogout() {
+        rest.postForEntity("/api/auth/register",
+                Map.of("email", "carol@test.local", "username", "carol", "password", "longenough1"),
+                Map.class);
+        ResponseEntity<Map> loginRes = rest.postForEntity("/api/auth/login",
+                Map.of("username", "carol", "password", "longenough1"), Map.class);
+
+        // login ต้องแนบ refresh cookie แบบ HttpOnly
+        String cookie1 = refreshCookieOf(loginRes);
+        assertThat(loginRes.getHeaders().get(HttpHeaders.SET_COOKIE).get(0)).contains("HttpOnly");
+
+        // refresh สำเร็จ → access ใหม่ + cookie ใหม่ (rotation)
+        ResponseEntity<Map> refreshed = refreshWith(cookie1);
+        assertThat(refreshed.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(refreshed.getBody()).containsKey("accessToken");
+        String cookie2 = refreshCookieOf(refreshed);
+        assertThat(cookie2).isNotEqualTo(cookie1);
+
+        // เอา cookie เก่า (ถูกหมุนทิ้งแล้ว) มาใช้ซ้ำ = ฉากขโมย → 401
+        assertThat(refreshWith(cookie1).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+
+        // ตรวจจับ reuse แล้วต้องเผาทุก session: cookie ใหม่ที่เพิ่งออกก็ใช้ไม่ได้แล้ว
+        assertThat(refreshWith(cookie2).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+
+        // login รอบใหม่ → logout → refresh ด้วย cookie นั้นไม่ได้อีก
+        ResponseEntity<Map> again = rest.postForEntity("/api/auth/login",
+                Map.of("username", "carol", "password", "longenough1"), Map.class);
+        String cookie3 = refreshCookieOf(again);
+        HttpHeaders logoutHeaders = new HttpHeaders();
+        logoutHeaders.add(HttpHeaders.COOKIE, cookie3);
+        ResponseEntity<Void> logout = rest.exchange("/api/auth/logout", HttpMethod.POST,
+                new HttpEntity<>(logoutHeaders), Void.class);
+        assertThat(logout.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(refreshWith(cookie3).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
 }

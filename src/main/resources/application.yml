@@ -24,3 +24,7 @@ jwt:
 
 app:
   admin-email: ${ADMIN_EMAIL:}   # อีเมลที่ register แล้วได้ ADMIN — เว้นว่าง = ปิดกลไก bootstrap
+
+auth:
+  refresh-ttl-days: ${REFRESH_TTL_DAYS:14}
+  cookie-secure: ${COOKIE_SECURE:false}   # true เมื่ออยู่หลัง TLS จริง
