@@ -16,3 +16,6 @@ spring:
 jwt:
   secret: ${JWT_SECRET}            # ≥ 32 ไบต์ — ห้ามมี default: ลืมตั้งต้องพังตอน boot ไม่ใช่หลุดไปใช้ค่าอ่อนแอ
   ttl-minutes: ${JWT_TTL_MINUTES:15}
+
+app:
+  admin-email: ${ADMIN_EMAIL:}   # อีเมลที่ register แล้วได้ ADMIN — เว้นว่าง = ปิดกลไก bootstrap

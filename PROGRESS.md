@@ -11,13 +11,15 @@
 - [x] 2. User entity + Flyway migration + JPA repository — 2026-06-12
 - [x] 3. POST /api/auth/register (validation + BCrypt) + GlobalExceptionHandler (RFC 7807) — 2026-06-12
 - [x] 4. POST /api/auth/login → JWT + Security filter chain (stateless) — 2026-06-12
-- [ ] 5. Roles USER/ADMIN + /api/admin/users + bootstrap admin จาก env
+- [x] 5. Roles USER/ADMIN + /api/admin/users + bootstrap admin จาก env — 2026-06-12
 - [ ] 6. เปลี่ยนรหัสผ่าน + structured logging/request id + integration tests (Testcontainers) + GitHub Actions CI
 - [ ] 7. refresh token (เก็บ DB, HttpOnly cookie, rotation) + logout/revoke
 
 เกณฑ์ผ่านเฟส: CI เขียวบน GitHub
 
 ## Log การทำงาน
+
+- 2026-06-12 — ขั้น 5 เสร็จ: @EnableMethodSecurity + @PreAuthorize("hasRole('ADMIN')") ที่ /api/admin/users; bootstrap admin จาก ADMIN_EMAIL env (เว้นว่าง = ปิด); **บั๊กที่เจอ+แก้**: @PreAuthorize โยน AccessDeniedException ทะลุ MVC เข้า catch-all ของ GlobalExceptionHandler → กลายเป็น 500 (accessDeniedHandler ของ filter chain จับไม่ถึงชั้น method) → เพิ่ม @ExceptionHandler(AccessDeniedException) → 403; เทสต์: ADMIN 200 / USER 403 / นิรนาม 401
 
 - 2026-06-12 — ขั้น 4 เสร็จ: JwtService (jjwt 0.12, HS512, secret จาก env แบบไม่มี default — ลืมตั้ง = พังตอน boot), JwtAuthFilter (token ดีใส่ SecurityContext, เสีย = นิรนาม), SecurityConfig stateless + permitAll เฉพาะ /health,/api/auth/** + entry point ตอบ 401 ProblemDetail (default Spring เป็น 403 ซึ่งผิดความหมาย); login คืน {accessToken,Bearer,expiresIn}; authenticate ใช้ข้อความเดียว "invalid credentials" ทั้งไม่มี user/รหัสผิด (กัน enumeration); /api/users/me อ่านจาก Principal; เทสต์ครบ: token ดี/ไม่มี/ขยะ/รหัสผิด/health เปิด
 

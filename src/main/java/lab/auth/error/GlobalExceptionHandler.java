@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +26,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     ProblemDetail unauthorized(UnauthorizedException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    // @PreAuthorize ที่ไม่ผ่านโยน exception ทะลุชั้น MVC มาถึงนี่ (accessDeniedHandler ของ
+    // filter chain จับไม่ถึง) — ถ้าไม่ดักเฉพาะ catch-all จะกลืนเป็น 500
+    @ExceptionHandler(AccessDeniedException.class)
+    ProblemDetail forbidden(AccessDeniedException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "insufficient role");
     }
 
     // ตาข่ายชั้นสอง: ถ้า unique constraint ใน DB จับของซ้ำได้ก่อนเรา (race ระหว่างเช็คกับ save)
