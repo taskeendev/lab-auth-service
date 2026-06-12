@@ -9,15 +9,17 @@
 
 - [x] 1. โครงโปรเจกต์: Spring Boot + Gradle + docker compose (Postgres) + /health + วินัย env — 2026-06-12
 - [x] 2. User entity + Flyway migration + JPA repository — 2026-06-12
-- [ ] 3. POST /api/auth/register (validation + BCrypt)
+- [x] 3. POST /api/auth/register (validation + BCrypt) + GlobalExceptionHandler (RFC 7807) — 2026-06-12
 - [ ] 4. POST /api/auth/login → JWT + Security filter chain (stateless)
 - [ ] 5. Roles USER/ADMIN + /api/admin/users + bootstrap admin จาก env
-- [ ] 6. เปลี่ยนรหัสผ่าน + integration tests (Testcontainers) + GitHub Actions CI
+- [ ] 6. เปลี่ยนรหัสผ่าน + structured logging/request id + integration tests (Testcontainers) + GitHub Actions CI
 - [ ] 7. refresh token (เก็บ DB, HttpOnly cookie, rotation) + logout/revoke
 
 เกณฑ์ผ่านเฟส: CI เขียวบน GitHub
 
 ## Log การทำงาน
+
+- 2026-06-12 — ขั้น 3 เสร็จ: /api/auth/register + Bean Validation (รหัส 8-72 — 72 คือเพดาน BCrypt) + UserService (เช็คซ้ำ → ConflictException) + GlobalExceptionHandler ตอบ RFC 7807 ทุกกรณี (409 ชัดเหตุ, 400 มี field errors, 500 ไม่รั่ว stack, DataIntegrityViolation เป็นตาข่าย race); UserResponse ไม่มีวันมี hash; เทสต์: 201/409/400 ตรงสัญญา, DB เก็บ $2a$ hash
 
 - 2026-06-12 — ขั้น 2 เสร็จ: V1__create_users.sql (BIGSERIAL, email/username UNIQUE, role default USER, created_at default now), entity User + Role enum + UserRepository; ddl-auto=validate (Flyway เป็นเจ้าของ schema, Hibernate เป็นผู้ตรวจ); verify: ตาราง+index ครบใน psql, flyway_schema_history v1 success, restart ไม่ migrate ซ้ำ
 
