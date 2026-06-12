@@ -10,7 +10,7 @@
 - [x] 1. โครงโปรเจกต์: Spring Boot + Gradle + docker compose (Postgres) + /health + วินัย env — 2026-06-12
 - [x] 2. User entity + Flyway migration + JPA repository — 2026-06-12
 - [x] 3. POST /api/auth/register (validation + BCrypt) + GlobalExceptionHandler (RFC 7807) — 2026-06-12
-- [ ] 4. POST /api/auth/login → JWT + Security filter chain (stateless)
+- [x] 4. POST /api/auth/login → JWT + Security filter chain (stateless) — 2026-06-12
 - [ ] 5. Roles USER/ADMIN + /api/admin/users + bootstrap admin จาก env
 - [ ] 6. เปลี่ยนรหัสผ่าน + structured logging/request id + integration tests (Testcontainers) + GitHub Actions CI
 - [ ] 7. refresh token (เก็บ DB, HttpOnly cookie, rotation) + logout/revoke
@@ -18,6 +18,8 @@
 เกณฑ์ผ่านเฟส: CI เขียวบน GitHub
 
 ## Log การทำงาน
+
+- 2026-06-12 — ขั้น 4 เสร็จ: JwtService (jjwt 0.12, HS512, secret จาก env แบบไม่มี default — ลืมตั้ง = พังตอน boot), JwtAuthFilter (token ดีใส่ SecurityContext, เสีย = นิรนาม), SecurityConfig stateless + permitAll เฉพาะ /health,/api/auth/** + entry point ตอบ 401 ProblemDetail (default Spring เป็น 403 ซึ่งผิดความหมาย); login คืน {accessToken,Bearer,expiresIn}; authenticate ใช้ข้อความเดียว "invalid credentials" ทั้งไม่มี user/รหัสผิด (กัน enumeration); /api/users/me อ่านจาก Principal; เทสต์ครบ: token ดี/ไม่มี/ขยะ/รหัสผิด/health เปิด
 
 - 2026-06-12 — ขั้น 3 เสร็จ: /api/auth/register + Bean Validation (รหัส 8-72 — 72 คือเพดาน BCrypt) + UserService (เช็คซ้ำ → ConflictException) + GlobalExceptionHandler ตอบ RFC 7807 ทุกกรณี (409 ชัดเหตุ, 400 มี field errors, 500 ไม่รั่ว stack, DataIntegrityViolation เป็นตาข่าย race); UserResponse ไม่มีวันมี hash; เทสต์: 201/409/400 ตรงสัญญา, DB เก็บ $2a$ hash
 

@@ -12,3 +12,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate   # Flyway เป็นเจ้าของ schema — Hibernate มีหน้าที่แค่ตรวจว่า entity ตรงกับตารางจริง
+
+jwt:
+  secret: ${JWT_SECRET}            # ≥ 32 ไบต์ — ห้ามมี default: ลืมตั้งต้องพังตอน boot ไม่ใช่หลุดไปใช้ค่าอ่อนแอ
+  ttl-minutes: ${JWT_TTL_MINUTES:15}
