@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.Instant;
 
 @Entity
 @Table(name = "users")
@@ -31,9 +30,6 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private Instant createdAt;
-
     protected User() {
         // JPA ต้องการ constructor ว่าง — กันคนอื่นเรียกใช้ตรงด้วย protected
     }
@@ -49,7 +45,6 @@ public class User {
     public String getUsername() { return username; }
     public String getPasswordHash() { return passwordHash; }
     public Role getRole() { return role; }
-    public Instant getCreatedAt() { return createdAt; }
 
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public void setRole(Role role) { this.role = role; }
