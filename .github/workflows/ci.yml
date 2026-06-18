@@ -16,6 +16,13 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+      - name: probe lab-common package access (diagnostic, ลบทีหลัง)
+        env:
+          TOK: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -u "x:$TOK" \
+            https://maven.pkg.github.com/taskeendev/lab-common/lab/lab-common/0.1.0/lab-common-0.1.0.pom)
+          echo "PROBE: GITHUB_TOKEN read lab-common pom -> HTTP $code"
       - name: build + tests (รวม integration กับ Postgres จริงผ่าน Testcontainers)
         run: ./gradlew build --no-daemon
         env:
