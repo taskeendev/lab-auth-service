@@ -1,6 +1,5 @@
 package lab.auth.security;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -34,11 +33,6 @@ public class JwtService {
                 .expiration(Date.from(now.plus(ttl)))
                 .signWith(key)
                 .compact();
-    }
-
-    // คืน claims ถ้า token ถูกต้อง — ลายเซ็นผิด/หมดอายุ/รูปเพี้ยน โยน JwtException ให้คนเรียกตัดสิน
-    public Claims verify(String token) {
-        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 
     public long ttlSeconds() {

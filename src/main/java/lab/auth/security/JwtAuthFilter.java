@@ -2,6 +2,7 @@ package lab.auth.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import lab.common.security.JwtVerifier;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,10 +20,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtVerifier jwtVerifier;
 
-    public JwtAuthFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
+    public JwtAuthFilter(JwtVerifier jwtVerifier) {
+        this.jwtVerifier = jwtVerifier;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             try {
-                Claims claims = jwtService.verify(header.substring(7));
+                Claims claims = jwtVerifier.verify(header.substring(7));
                 var authority = new SimpleGrantedAuthority("ROLE_" + claims.get("role", String.class));
                 var auth = new UsernamePasswordAuthenticationToken(
                         claims.getSubject(), null, List.of(authority));
